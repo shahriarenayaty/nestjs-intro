@@ -5,13 +5,18 @@ import { MessageFormatterService } from './message-formatter/message-formatter.s
 import { LoggerService } from './logger/logger.service';
 import { TasksModule } from './tasks/tasks.module';
 import { ConfigModule } from '@nestjs/config';
-import { appConfig } from './config/app.config';
+import { appConfig, appValidationSchema } from './config/app.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig],
+      validationSchema: appValidationSchema,
+      validationOptions: {
+        allowUnknown: true,
+        abortEarly: false,
+      },
     }),
     TasksModule,
   ],
