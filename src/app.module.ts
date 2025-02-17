@@ -9,6 +9,7 @@ import { appConfig, appValidationSchema } from './config/app.config';
 import { typeOrmConfig } from './config/database.config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigTypes } from './config/config.types';
+import { TypedConfigService } from './config/typed-config.service';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { ConfigTypes } from './config/config.types';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<ConfigTypes>) => {
+      useFactory: (configService: TypedConfigService) => {
         const options = configService.get<TypeOrmModuleOptions>('database');
         if (!options) {
           throw new Error('Database configuration not found');
@@ -35,6 +36,16 @@ import { ConfigTypes } from './config/config.types';
     TasksModule,
   ],
   controllers: [AppController],
-  providers: [AppService, MessageFormatterService, LoggerService],
+  providers: [
+    AppService,
+    MessageFormatterService,
+    LoggerService,
+    //every time a class, TypedConfigService is this need to be injected,
+    //it should actually inject another existing provider, ConfigService.
+    {
+      provide: TypedConfigService,
+      useExisting: ConfigService,
+    },
+  ],
 })
 export class AppModule {}
